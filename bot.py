@@ -8,16 +8,13 @@ with open("token.txt") as f:
 bot = telebot.TeleBot(token)
 
 def db_table_val(user_id: int, user_name: str, user_surname: str, username: str):
-    conn = sqlite3.connect('database.db', check_same_thread=False)
-    cursor = conn.cursor()
-    try:
-        cursor.execute('INSERT INTO name (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)', (user_id, user_name, user_surname, username))
-        conn.commit()
-        isold = False
-    except(sqlite3.IntegrityError):
-        isold = True 
-    finally:
-        conn.close()
+    with sqlite3.connect('database.db') as connection:
+        
+        try:
+            connection.execute('INSERT INTO name (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)', (user_id, user_name, user_surname, username))
+            isold = False
+        except(sqlite3.IntegrityError):
+            isold = True 
         return isold
         
 @bot.message_handler(content_types=['text'])
@@ -37,6 +34,8 @@ def get_text_messages(message):
             bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
     elif message.text == "/help":
         bot.send_message(message.from_user.id, "Напиши привет")
+    elif message.text.lower() == "пока": 
+        bot.send_message(message.from_user.id, "Я буду скучать, {}!".format(us_name))
     else:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 
