@@ -11,7 +11,7 @@ def db_table_val(user_id: int, user_name: str, user_surname: str, username: str)
     with sqlite3.connect('database.db') as connection:
         
         try:
-            connection.execute('INSERT INTO name (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)', (user_id, user_name, user_surname, username))
+            connection.execute('INSERT INTO user (user_id, user_name, user_surname, username) VALUES (?, ?, ?, ?)', (user_id, user_name, user_surname, username))
             isold = False
         except(sqlite3.IntegrityError):
             isold = True 
