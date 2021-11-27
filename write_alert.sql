@@ -1,0 +1,1 @@
+insert into alert (user, datetime, taskname) values (1426537100, '2021-11-27 16:40:00', 'ыщжша');

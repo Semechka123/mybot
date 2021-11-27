@@ -1,0 +1,1 @@
+select * from alert where datetime>="2022-02-16 03:50";

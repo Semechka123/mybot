@@ -1,8 +1,9 @@
 import sqlite3
-
 import telebot
-
 import datetime
+import schedule
+import time
+from threading import Thread
 
 with open("token.txt") as f:
     token=f.readline() 
@@ -50,7 +51,7 @@ def get_text_messages(message):
     elif message.text == "/help":
         bot.send_message(message.from_user.id, "Напиши привет")
     elif message.text.lower() == "пока": 
-        bot.send_message(message.from_user.id, "Я буду скучать, {}!".format(us_name))
+        bot.send_message(message.from_user.id, "пока, {}!".format(us_name))
     elif " ".join(message.text.lower().split()[:2]) == "напомни мне":
         try:
             words = message.text.lower().split()
@@ -74,4 +75,35 @@ def get_text_messages(message):
     else:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 
-bot.polling(none_stop=True, interval=0)
+
+def alert_read():
+    with sqlite3.connect('database.db') as connection:
+        
+        try:
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+':00'
+            print(current_time)
+            all_alert = connection.execute('select * from alert where datetime =:current_time', {'current_time': current_time})
+            result = all_alert.fetchall()
+        except(sqlite3.IntegrityError, ValueError):
+            result = None
+        return result
+
+def send_message():
+    alerts = alert_read()
+    if alerts == None:
+        print("Запрос не выполнен")
+    else:
+        for element in alerts:
+            bot.send_message(element[1], element[3])
+
+
+def schedule_checker():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)    
+
+
+schedule.every(1).minutes.do(send_message)
+Thread(target=schedule_checker).start() 
+
+bot.polling(none_stop=True, interval=1)
